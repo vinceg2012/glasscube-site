@@ -1,5 +1,5 @@
 /* ========================================
-   CubeSense 3D — Scroll Reveal
+   GlassCube AR — Scroll Reveal
    ======================================== */
 
 (function () {
