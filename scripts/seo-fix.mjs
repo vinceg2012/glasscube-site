@@ -143,6 +143,24 @@ function ensureFavicons(html, root) {
       label: 'added <link rel="icon"> (icon.svg)',
     },
     {
+      file: 'favicon.png',
+      tag: '  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">',
+      probe: /<link\s+[^>]*rel=["']icon["'][^>]*href=["'][^"']*favicon\.png/i,
+      label: 'added <link rel="icon"> (favicon.png)',
+    },
+    {
+      file: 'icon-192.png',
+      tag: '  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">',
+      probe: /<link\s+[^>]*rel=["']icon["'][^>]*sizes=["']192x192["']/i,
+      label: 'added <link rel="icon"> (icon-192.png)',
+    },
+    {
+      file: 'icon-512.png',
+      tag: '  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">',
+      probe: /<link\s+[^>]*rel=["']icon["'][^>]*sizes=["']512x512["']/i,
+      label: 'added <link rel="icon"> (icon-512.png)',
+    },
+    {
       file: 'apple-touch-icon.png',
       tag: '  <link rel="apple-touch-icon" href="/apple-touch-icon.png">',
       probe: /<link\s+[^>]*rel=["']apple-touch-icon["']/i,

@@ -26,9 +26,20 @@ const REQUIRED_PATTERNS = [
   /<meta\s+[^>]*property=["']og:description["']/i,
   /<meta\s+[^>]*property=["']og:url["']/i,
   /<meta\s+[^>]*property=["']og:type["']/i,
+  /<meta\s+[^>]*property=["']og:image["']/i,
   /<meta\s+[^>]*name=["']twitter:card["']/i,
   /<meta\s+[^>]*name=["']twitter:title["']/i,
   /<meta\s+[^>]*name=["']twitter:description["']/i,
+  /<link\s+[^>]*rel=["']icon["']/i,
+  /<link\s+[^>]*rel=["']apple-touch-icon["']/i,
+];
+
+const REQUIRED_ICON_FILES = [
+  'favicon.png',
+  'icon-192.png',
+  'icon-512.png',
+  'apple-touch-icon.png',
+  'og-image.png',
 ];
 
 const htmlFiles = listHtmlFiles(ROOT);
@@ -90,4 +101,19 @@ test('canonical URLs are absolute https URLs', () => {
     const m = html.match(/<link\s+[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["']/i);
     if (m) assert.match(m[1], /^https:\/\//, `${file} canonical not https`);
   }
+});
+
+test('all required icon/social-image files exist on disk', () => {
+  for (const f of REQUIRED_ICON_FILES) {
+    assert.ok(
+      readdirSync(ROOT).includes(f),
+      `${f} missing — generate from glasscude-ar.png with sips`
+    );
+  }
+});
+
+test('index.html references the hero mark image', () => {
+  const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+  assert.match(html, /class=["'][^"']*\bhero-mark\b/);
+  assert.match(html, /glasscude-ar\.png/);
 });
