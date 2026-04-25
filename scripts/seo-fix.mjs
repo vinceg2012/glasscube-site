@@ -127,6 +127,53 @@ function ensureCanonical(html, url) {
   );
 }
 
+function ensureFavicons(html, root) {
+  // Map of optional icon files → link tag to inject when present.
+  const candidates = [
+    {
+      file: 'favicon.ico',
+      tag: '  <link rel="icon" href="/favicon.ico" sizes="any">',
+      probe: /<link\s+[^>]*rel=["'](?:shortcut )?icon["'][^>]*href=["'][^"']*favicon\.ico/i,
+      label: 'added <link rel="icon"> (favicon.ico)',
+    },
+    {
+      file: 'icon.svg',
+      tag: '  <link rel="icon" href="/icon.svg" type="image/svg+xml">',
+      probe: /<link\s+[^>]*rel=["']icon["'][^>]*href=["'][^"']*icon\.svg/i,
+      label: 'added <link rel="icon"> (icon.svg)',
+    },
+    {
+      file: 'apple-touch-icon.png',
+      tag: '  <link rel="apple-touch-icon" href="/apple-touch-icon.png">',
+      probe: /<link\s+[^>]*rel=["']apple-touch-icon["']/i,
+      label: 'added <link rel="apple-touch-icon">',
+    },
+  ];
+  let current = html;
+  const fixes = [];
+  for (const c of candidates) {
+    if (!existsSync(join(root, c.file))) continue;
+    if (c.probe.test(current)) continue;
+    const r = injectIntoHead(current, c.tag, c.label);
+    current = r.html;
+    fixes.push(...r.fixes);
+  }
+  return { html: current, fixes };
+}
+
+function ensureOgImage(html, root) {
+  if (/<meta\s+[^>]*property=["']og:image["']/i.test(html)) return { html, fixes: [] };
+  // Prefer a dedicated social image, fall back to apple-touch-icon.
+  const candidates = ['og-image.png', 'og-image.jpg', 'apple-touch-icon.png'];
+  const found = candidates.find((f) => existsSync(join(root, f)));
+  if (!found) return { html, fixes: [] };
+  return injectIntoHead(
+    html,
+    `  <meta property="og:image" content="${SITE_URL}/${found}">`,
+    `added <meta property="og:image"> (${found})`
+  );
+}
+
 function injectIntoHead(html, line, fixLabel) {
   if (/<\/head>/i.test(html)) {
     return {
@@ -156,6 +203,8 @@ export function fixHtml(html, fileName) {
     (h) => ensureViewport(h),
     (h) => ensureTitle(h, meta),
     (h) => ensureCanonical(h, meta.canonical),
+    (h) => ensureFavicons(h, ROOT),
+    (h) => ensureOgImage(h, ROOT),
     ...REQUIRED_META.map((r) => (h) => ensureMetaName(h, r.name, r.source(meta))),
     ...REQUIRED_OG.map((r) => (h) => ensureMetaProperty(h, r.property, r.source(meta))),
     ...REQUIRED_TWITTER.map((r) => (h) => ensureMetaName(h, r.name, r.source(meta))),
