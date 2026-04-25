@@ -1,0 +1,17 @@
+#!/bin/sh
+# Auto-fix SEO and re-stage any files the fixer modified.
+set -e
+
+echo "[pre-commit] SEO auto-fix…"
+node scripts/seo-fix.mjs
+
+# Re-stage anything the fixer changed (only files already tracked / staged scope).
+CHANGED=$(git diff --name-only -- '*.html' sitemap.xml robots.txt 2>/dev/null || true)
+if [ -n "$CHANGED" ]; then
+  echo "[pre-commit] re-staging fixer changes:"
+  echo "$CHANGED" | sed 's/^/  /'
+  echo "$CHANGED" | xargs git add
+fi
+
+echo "[pre-commit] running tests…"
+node --test 'test/**/*.test.mjs'

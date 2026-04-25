@@ -1,0 +1,9 @@
+#!/bin/sh
+# Verify SEO is clean and tests pass before pushing.
+set -e
+
+echo "[pre-push] SEO check…"
+node scripts/seo-fix.mjs --check
+
+echo "[pre-push] running tests…"
+node --test 'test/**/*.test.mjs'
